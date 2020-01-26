@@ -3,5 +3,5 @@
 ## Install
 
 ```sh
-yarn add -D @n-works/assets-builder
+yarn add @n-works/assets-builder
 ```
