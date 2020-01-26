@@ -14,5 +14,12 @@
   "extends": [
     "standard",
     "plugin:vue/recommended"
-  ]
+  ],
+  "rules": {
+    "vue/html-self-closing": ["error", {
+      "html": {
+        "component": "never"
+      }
+    }]
+  }
 }
