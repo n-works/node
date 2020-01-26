@@ -1,10 +1,10 @@
 import Vue from 'vue'
-import App from './components/App.vue'
+import App from './components/App'
 
 document.addEventListener('DOMContentLoaded', () => {
   /* eslint-disable-next-line no-new */
   new Vue({
-    el: document.querySelector('.app'),
+    el: document.querySelector('.vue-app'),
     render: h => h(App)
   })
 })
