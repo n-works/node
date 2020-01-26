@@ -1,0 +1,18 @@
+{
+  "ignorePatterns": [
+    "node_modules",
+    "dist"
+  ],
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "plugins": [
+    "html",
+    "vue"
+  ],
+  "extends": [
+    "standard",
+    "plugin:vue/recommended"
+  ]
+}
