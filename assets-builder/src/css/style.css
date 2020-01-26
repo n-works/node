@@ -1,0 +1,56 @@
+@import "./common/logo";
+
+* {
+  box-sizing: border-box;
+}
+
+*::before,
+*::after {
+  box-sizing: inherit;
+  font-family: inherit;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+
+  .heading {
+    color: var(--green-dark);
+    font-weight: var(--bold);
+    font-size: var(--large);
+    line-height: 1;
+    text-align: center;
+  }
+
+  .colors {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    .color {
+      width: 100px;
+      padding: 5px;
+      color: white;
+      text-align: center;
+    }
+
+    .color + .color {
+      margin-left: 10px;
+    }
+
+    .color.rounded {
+      border-radius: 16px;
+    }
+  }
+}
+
+.test {
+  display: grid;
+  grid-template-columns: 200px 1fr 200px;
+  background: url(hogehoge/aaa.png);
+}
