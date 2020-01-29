@@ -1,5 +1,5 @@
-const Path = require('path')
-const Bundler = require('parcel-bundler')
+const path = require('path')
+const ParcelBundler = require('parcel-bundler')
 
 module.exports = class Builder {
   constructor (env = {}) {
@@ -17,16 +17,16 @@ module.exports = class Builder {
   }
 
   async build () {
-    const src = Path.resolve(this.PATH.src)
-    const dist = Path.resolve(this.PATH.dist)
-    const entryFiles = [
-      `${Path.join(src, this.PATH.html)}/*.html`,
-      `${Path.join(src, this.PATH.css)}/*.css`,
-      `${Path.join(src, this.PATH.js)}/*.js`,
-      `${Path.join(src, this.PATH.vue)}/*.js`
+    const src = path.resolve(this.PATH.src)
+    const dist = path.resolve(this.PATH.dist)
+    const entries = [
+      `${path.join(src, this.PATH.html)}/*.html`,
+      `${path.join(src, this.PATH.css)}/*.css`,
+      `${path.join(src, this.PATH.js)}/*.js`,
+      `${path.join(src, this.PATH.vue)}/*.js`
     ]
 
-    const bundler = new Bundler(entryFiles, {
+    const parcel = new ParcelBundler(entries, {
       outDir: dist,
       publicUrl: '.',
       minify: this.MINIFY,
@@ -37,6 +37,6 @@ module.exports = class Builder {
       detailedReport: true
     })
 
-    await bundler.bundle()
+    await parcel.bundle()
   }
 }
