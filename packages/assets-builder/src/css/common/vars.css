@@ -1,0 +1,14 @@
+:root {
+  /* font size */
+  --small: 16px;
+  --medium: 24px;
+  --large: 48px;
+
+  /* font weight */
+  --normal: 400;
+  --bold: 700;
+
+  /* color */
+  --green: #41b883;
+  --green-dark: #35495e;
+}

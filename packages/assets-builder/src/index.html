@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>assets-bundler</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="vue/index.css">
+<script src="js/script.js"></script>
+<script src="vue/index.js"></script>
+<style>
+.bundler {
+  font-size: var(--small);
+  color: var(--green-dark);
+  font-weight: var(--normal);
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const bundler = 'assets-bundler';
+  document.querySelector('.heading').insertAdjacentHTML('beforeend',
+    `<br><span class="bundler">built by ${bundler}</span>`
+  )
+})
+</script>
+</head>
+<body>
+
+<section class="container">
+  <div class="logo"></div>
+  <h1 class="heading">Hello, Vue</h1>
+  <ul class="colors">
+    <li class="color">red</li>
+    <li class="color">green</li>
+    <li class="color">blue</li>
+  </ul>
+  <div class="vue-app"></div>
+</section>
+
+</body>
+</html>

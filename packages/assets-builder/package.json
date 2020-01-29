@@ -1,0 +1,41 @@
+{
+  "name": "@n-works/assets-builder",
+  "version": "1.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/n-works/node.git",
+    "directory": "packages/assets-builder"
+  },
+  "bin": {
+    "assets": "index.js"
+  },
+  "scripts": {
+    "test": "node -r dotenv/config index.js dotenv_config_path=.env.sample"
+  },
+  "dependencies": {
+    "@babel/core": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "@n-works/parcel-plugin-no-externals": "^1.0.0",
+    "@vue/component-compiler-utils": "^3.1.1",
+    "autoprefixer": "^9.7.4",
+    "chalk": "^3.0.0",
+    "chokidar": "^3.3.1",
+    "commander": "^4.1.0",
+    "imagemin": "^7.0.1",
+    "imagemin-mozjpeg": "^8.0.0",
+    "imagemin-pngquant": "^8.0.0",
+    "imagemin-svgo": "^7.0.0",
+    "imagemin-webp": "^5.1.0",
+    "parcel-bundler": "^1.12.4",
+    "postcss": "^7.0.26",
+    "postcss-custom-properties": "^9.0.2",
+    "postcss-import": "^12.0.1",
+    "postcss-nested": "^4.2.1",
+    "vue": "^2.6.11",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "devDependencies": {
+    "dotenv": "^8.2.0"
+  }
+}

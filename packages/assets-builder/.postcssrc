@@ -1,0 +1,13 @@
+{
+  "plugins": {
+    "postcss-import": {},
+    "autoprefixer": {
+      "grid": true
+    },
+    "postcss-custom-properties": {
+      "preserve": false,
+      "importFrom": "src/css/common/vars.css"
+    },
+    "postcss-nested": {}
+  }
+}
