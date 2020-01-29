@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const chokidar = require('chokidar')
 const imagemin = require('imagemin')
 const imageminMozjpeg = require('imagemin-mozjpeg')
 const imageminPngquant = require('imagemin-pngquant')
@@ -12,7 +13,7 @@ module.exports = class Builder {
     this.PATH = {
       src: env.ASSETS_PATH_SRC || 'src',
       dist: env.ASSETS_PATH_DIST || 'dist',
-      img: env.ASSETS_PATH_IMG || 'img'
+      img: env.ASSETS_PATH_IMG
     }
     this.JPEG_QUALITY = parseInt(env.ASSETS_JPEG_QUALITY) || 70
     this.PNG_QUALITY = parseInt(env.ASSETS_PNG_QUALITY) || 70
@@ -28,15 +29,37 @@ module.exports = class Builder {
     return [basePath, ...entries].flat()
   }
 
-  async build () {
-    const srcPath = path.join(path.resolve(this.PATH.src), this.PATH.img)
-    const distPath = path.join(path.resolve(this.PATH.dist), this.PATH.img)
-
-    if (!fs.existsSync(srcPath)) {
+  start () {
+    if (this.PATH.img === null) {
       return
     }
 
-    return Promise.all(this.getEntries(srcPath).map(entry => {
+    const srcPath = path.join(path.resolve(this.PATH.src), this.PATH.img)
+    const distPath = path.join(path.resolve(this.PATH.dist), this.PATH.img)
+
+    const entries = this.getEntries(srcPath)
+    const entriesToWatch = [
+      `${srcPath}/**/*.jpg`,
+      `${srcPath}/**/*.png`,
+      `${srcPath}/**/*.svg`
+    ]
+
+    chokidar.watch(entriesToWatch, { ignoreInitial: true })
+      .on('ready', () => {
+        this.build(entries, srcPath, distPath)
+      })
+      .on('all', e => {
+        switch (e) {
+          case 'add':
+          case 'change':
+            this.build(entries, srcPath, distPath)
+            break
+        }
+      })
+  }
+
+  async build (entries, srcPath, distPath) {
+    return Promise.all(entries.map(entry => {
       const destination = entry.replace(srcPath, distPath)
 
       return Promise.all([
@@ -70,8 +93,6 @@ module.exports = class Builder {
         })
       ])
     })).then(files => {
-      console.log('')
-
       files
         .flat(2)
         .sort((f1, f2) =>
@@ -88,8 +109,6 @@ module.exports = class Builder {
             chalk.magenta.bold(`${(fileSizeMinified / 1000).toFixed(1)} KB`)
           )
         })
-
-      console.log('')
     })
   }
 }
