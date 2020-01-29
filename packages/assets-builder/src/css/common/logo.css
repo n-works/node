@@ -6,30 +6,30 @@
   border-top: 180px solid var(--green);
   border-right: 100px solid transparent;
   border-left: 100px solid transparent;
-}
 
-.logo::before {
-  position: absolute;
-  top: -180px;
-  left: -60px;
-  z-index: 1;
-  width: 0;
-  height: 0;
-  border-top: 110px solid var(--green-dark);
-  border-right: 60px solid transparent;
-  border-left: 60px solid transparent;
-  content: "";
-}
+  &::before {
+    position: absolute;
+    top: -180px;
+    left: -60px;
+    z-index: 1;
+    width: 0;
+    height: 0;
+    border-top: 110px solid var(--green-dark);
+    border-right: 60px solid transparent;
+    border-left: 60px solid transparent;
+    content: "";
+  }
 
-.logo::after {
-  position: absolute;
-  top: -180px;
-  left: -20px;
-  z-index: 2;
-  width: 0;
-  height: 0;
-  border-top: 40px solid white;
-  border-right: 20px solid transparent;
-  border-left: 20px solid transparent;
-  content: "";
+  &::after {
+    position: absolute;
+    top: -180px;
+    left: -20px;
+    z-index: 2;
+    width: 0;
+    height: 0;
+    border-top: 40px solid white;
+    border-right: 20px solid transparent;
+    border-left: 20px solid transparent;
+    content: "";
+  }
 }

@@ -9,14 +9,14 @@
 <script src="vue/index.js"></script>
 <style>
 .bundler {
-  font-size: var(--small);
   color: var(--green-dark);
   font-weight: var(--normal);
+  font-size: var(--small);
 }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const bundler = 'assets-bundler';
+  const bundler = 'assets-bundler'
   document.querySelector('.heading').insertAdjacentHTML('beforeend',
     `<br><span class="bundler">built by ${bundler}</span>`
   )
@@ -28,7 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
 <section class="container">
   <div class="logo"></div>
   <h1 class="heading">Hello, Vue</h1>
-  <ul class="colors">
+  <ul class="icons">
+    <li class="image"><img src="img/icons/png/instagram.webp" alt=""> instagram</li>
     <li class="color">red</li>
     <li class="color">green</li>
     <li class="color">blue</li>

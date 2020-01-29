@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-const Commander = require('commander')
-const ParcelBuilder = require('./builders/parcel-builder')
-const ImageminBuilder = require('./builders/imagemin-builder')
+const commander = require('commander')
+const ParcelBuilder = require('./builders/ParcelBuilder')
+// const ImageminBuilder = require('./builders/ImageminBuilder')
 
-Commander
+commander
   .option('-w, --watch', 'watch file changes')
   .parse(process.argv)
 
 new ParcelBuilder(process.env).build()
-new ImageminBuilder(process.env).build()
+// new ImageminBuilder(process.env).build()

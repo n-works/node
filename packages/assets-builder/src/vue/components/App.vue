@@ -1,9 +1,6 @@
 <template>
   <div class="app">
-    <btn
-      label="Check my UserAgent"
-      @click="checkUserAgent"
-    ></btn>
+    <btn label="Check User Agent" @click="checkUserAgent"></btn>
     <p class="user-agent">
       {{ userAgent }}
     </p>
@@ -32,10 +29,15 @@ module.exports = {
 
 <style scoped>
 .app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 30px;
 }
 
-.userAgent {
-
+.user-agent {
+  min-height: 2em;
+  color: var(--green-dark);
+  font-size: var(--small);
 }
 </style>
