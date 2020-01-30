@@ -4,9 +4,6 @@ const ParcelBundler = require('parcel-bundler')
 
 module.exports = class Builder {
   constructor (env = {}) {
-    this.PATH_SRC = path.resolve(env.ASSETS_PATH_SRC || 'src')
-    this.PATH_DIST = path.resolve(env.ASSETS_PATH_DIST || 'dist')
-
     this.MINIFY =
       env.ASSETS_MINIFY !== undefined
         ? env.ASSETS_MINIFY === 'true'
@@ -24,6 +21,9 @@ module.exports = class Builder {
 
     this.entries = []
     this.entriesToWatch = []
+
+    this.PATH_SRC = path.resolve(env.ASSETS_PATH_SRC || 'src')
+    this.PATH_DIST = path.resolve(env.ASSETS_PATH_DIST || 'dist')
 
     if (env.ASSETS_PATH_HTML !== undefined) {
       const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_HTML)
