@@ -1,0 +1,72 @@
+version: "3"
+
+services:
+  wordpress:
+    image: nworks/wordpress
+    depends_on:
+      - mysql
+    ports:
+      - 80:80
+    working_dir: /var/www/html/wp
+    volumes:
+      - ./public:/var/www/html
+      - ./docker/mysql:/var/www/mysql
+    environment:
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_NAME: localdb
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: root
+      WORDPRESS_TABLE_PREFIX: wps_
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_SITEURL', $$_SERVER['REQUEST_SCHEME'] . '://' . $$_SERVER['SERVER_NAME'] . '/wp' );
+        define( 'WP_HOME', $$_SERVER['REQUEST_SCHEME'] . '://' . $$_SERVER['SERVER_NAME'] );
+    env_file:
+      - .env
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    depends_on:
+      - mysql
+    ports:
+      - 8080:80
+    volumes:
+      - phpmyadmin:/sessions
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    env_file:
+      - .env
+
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./docker/mysql:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_DATABASE: localdb
+      MYSQL_ROOT_PASSWORD: root
+    env_file:
+      - .env
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025
+      - 8025:8025
+    environment:
+      MH_STORAGE: maildir
+      MH_MAILDIR_PATH: /tmp
+    volumes:
+      - mailhog:/tmp
+    env_file:
+      - .env
+
+volumes:
+  phpmyadmin:
+    driver: local
+  mysql:
+    driver: local
+  mailhog:
+    driver: local
