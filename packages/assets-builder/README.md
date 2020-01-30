@@ -3,5 +3,5 @@
 ## Install
 
 ```sh
-yarn add @n-works/assets-builder
+yarn add @n-works/assets-builder @babel/core
 ```
