@@ -10,6 +10,24 @@ const chalk = require('chalk')
 
 module.exports = class Builder {
   constructor (env = {}) {
+    this.QUALITY_JPEG =
+      env.ASSETS_QUALITY_JPEG !== undefined
+        ? parseInt(env.ASSETS_QUALITY_JPEG)
+        : 70
+
+    this.QUALITY_PNG =
+      env.ASSETS_QUALITY_PNG !== undefined
+        ? parseInt(env.ASSETS_QUALITY_PNG)
+        : 70
+
+    this.QUALITY_WEBP =
+      env.ASSETS_QUALITY_WEBP !== undefined
+        ? parseInt(env.ASSETS_QUALITY_WEBP)
+        : 70
+
+    this.entries = []
+    this.entriesToWatch = []
+
     if (env.ASSETS_PATH_IMG === undefined) {
       return
     }
@@ -28,24 +46,6 @@ module.exports = class Builder {
       path.resolve(),
       this.PATH_DIST
     )
-
-    this.QUALITY_JPEG =
-      env.ASSETS_QUALITY_JPEG !== undefined
-        ? parseInt(env.ASSETS_QUALITY_JPEG)
-        : 70
-
-    this.QUALITY_PNG =
-      env.ASSETS_QUALITY_PNG !== undefined
-        ? parseInt(env.ASSETS_QUALITY_PNG)
-        : 70
-
-    this.QUALITY_WEBP =
-      env.ASSETS_QUALITY_WEBP !== undefined
-        ? parseInt(env.ASSETS_QUALITY_WEBP)
-        : 70
-
-    this.entries = []
-    this.entriesToWatch = []
 
     if (fs.existsSync(this.PATH_SRC)) {
       this.entries = this.getDirectoryPaths(this.PATH_SRC)
