@@ -8,11 +8,14 @@
     "node": true
   },
   "plugins": [
-    "html",
     "vue"
   ],
   "extends": [
     "standard",
     "plugin:vue/recommended"
-  ]
+  ],
+  "rules": {
+    "vue/html-self-closing": "off",
+    "vue/max-attributes-per-line": "off"
+  }
 }

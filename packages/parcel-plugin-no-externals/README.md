@@ -3,5 +3,5 @@
 ## Install
 
 ```sh
-yarn add -D @n-works/parcel-plugin-no-externals
+yarn add @n-works/parcel-plugin-no-externals
 ```
