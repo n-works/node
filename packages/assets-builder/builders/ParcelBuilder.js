@@ -1,365 +1,83 @@
-2ytconst path = require('path')
+const path = require('path')
 const chokidar = require('chokidar')
 const ParcelBundler = require('parcel-bundler')
 
 module.exports = class Builder {
-constructor (env = {}) {
-  this.PATH = {
-    src: env.ASSETS_PATH_SRC || 'src',
-    dist: env.ASSETS_PATH_DIST || 'dist',
-    html: env.ASSETS_PATH_HTML,
-    css: env.ASSETS_PATH_CSS,
-    js: env.ASSETS_PATH_JS,
-    vue: env.ASSETS_PATH_VUE
-  }
-  this.MINIFY = (env.ASSETS_MINIFY || 'true') === 'true'
-  this.SOURCEMAPS = (env.ASSETS_SOURCEMAPS || 'false') === 'true'
-  this.CACHE = (env.ASSETS_CACHE || 'true') === 'true'
-}
+  constructor (env = {}) {
+    this.PATH_SRC = path.resolve(env.ASSETS_PATH_SRC || 'src')
+    this.PATH_DIST = path.resolve(env.ASSETS_PATH_DIST || 'dist')
 
-start () {
-  const srcPath = path.resolve(this.PATH.src)
-  const distPath = path.resolve(this.PATH.dist)
+    this.MINIFY =
+      env.ASSETS_MINIFY !== undefined
+        ? env.ASSETS_MINIFY === 'true'
+        : true
 
-  const entries = []
-  const entriesToWatch = []
+    this.SOURCEMAPS =
+      env.ASSETS_SOURCEMAPS !== undefined
+        ? env.ASSETS_SOURCEMAPS === 'true'
+        : false
 
-  if (this.PATH.html !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.html)}/*.html`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.html)}/*.html`)
-  }
-  if (this.PATH.css !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.css)}/*.css`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.css)}/**/*.css`)
-  }
-  if (this.PATH.js !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.js)}/*.js`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.js)}/**/*.js`)
-  }
-  if (this.PATH.vue !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.vue)}/*.js`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.vue`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.css`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.js`)
+    this.CACHE =
+      env.ASSETS_CACHE !== undefined
+        ? env.ASSETS_CACHE === 'true'
+        : true
+
+    this.entries = []
+    this.entriesToWatch = []
+
+    if (env.ASSETS_PATH_HTML !== undefined) {
+      const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_HTML)
+      this.entries.push(`${srcPath}/*.html`)
+      this.entriesToWatch.push(`${srcPath}/*.html`)
+    }
+
+    if (env.ASSETS_PATH_CSS !== undefined) {
+      const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_CSS)
+      this.entries.push(`${srcPath}/*.css`)
+      this.entriesToWatch.push(`${srcPath}/**/*.css`)
+    }
+
+    if (env.ASSETS_PATH_JS !== undefined) {
+      const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_JS)
+      this.entries.push(`${srcPath}/*.js`)
+      this.entriesToWatch.push(`${srcPath}/**/*.js`)
+    }
+
+    if (env.ASSETS_PATH_VUE !== undefined) {
+      const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_VUE)
+      this.entries.push(`${srcPath}/*.js`)
+      this.entriesToWatch.push(`${srcPath}/**/*.vue`)
+      this.entriesToWatch.push(`${srcPath}/**/*.css`)
+      this.entriesToWatch.push(`${srcPath}/**/*.js`)
+    }
   }
 
-  chokidar.watch(entriesToWatch, { ignoreInitial: true })
-    .on('ready', () => {
-      this.build(entries, distPath)
+  start () {
+    chokidar.watch(this.entriesToWatch, { ignoreInitial: true })
+      .on('ready', () => {
+        this.build()
+      })
+      .on('all', e => {
+        switch (e) {
+          case 'add':
+          case 'change':
+            this.build()
+            break
+        }
+      })
+  }
+
+  async build () {
+    const parcel = new ParcelBundler(this.entries, {
+      outDir: this.PATH_DIST,
+      publicUrl: '.',
+      minify: this.MINIFY,
+      sourceMaps: this.SOURCEMAPS,
+      cache: this.CACHE,
+      watch: false,
+      hmr: false
     })
-    .on('all', e => {
-      switch (e) {
-        case 'add':
-        case 'change':
-          this.build(entries, distPath)
-          break
-      }
-    })
-}
 
-async build (entries, distPath) {
-  const parcel = new ParcelBundler(entries, {
-    outDir: distPath,
-    publicUrl: '.',
-    minify: this.MINIFY,
-    sourceMaps: this.SOURCEMAPS,
-    cache: this.CACHE,
-    watch: false,
-    hmr: false
-  })
-
-  await parcel.bundle()
-}
-}
-2ytconst path = require('path')
-const chokidar = require('chokidar')
-const ParcelBundler = require('parcel-bundler')
-
-module.exports = class Builder {
-constructor (env = {}) {
-  this.PATH = {
-    src: env.ASSETS_PATH_SRC || 'src',
-    dist: env.ASSETS_PATH_DIST || 'dist',
-    html: env.ASSETS_PATH_HTML,
-    css: env.ASSETS_PATH_CSS,
-    js: env.ASSETS_PATH_JS,
-    vue: env.ASSETS_PATH_VUE
+    await parcel.bundle()
   }
-  this.MINIFY = (env.ASSETS_MINIFY || 'true') === 'true'
-  this.SOURCEMAPS = (env.ASSETS_SOURCEMAPS || 'false') === 'true'
-  this.CACHE = (env.ASSETS_CACHE || 'true') === 'true'
-}
-
-start () {
-  const srcPath = path.resolve(this.PATH.src)
-  const distPath = path.resolve(this.PATH.dist)
-
-  const entries = []
-  const entriesToWatch = []
-
-  if (this.PATH.html !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.html)}/*.html`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.html)}/*.html`)
-  }
-  if (this.PATH.css !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.css)}/*.css`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.css)}/**/*.css`)
-  }
-  if (this.PATH.js !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.js)}/*.js`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.js)}/**/*.js`)
-  }
-  if (this.PATH.vue !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.vue)}/*.js`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.vue`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.css`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.js`)
-  }
-
-  chokidar.watch(entriesToWatch, { ignoreInitial: true })
-    .on('ready', () => {
-      this.build(entries, distPath)
-    })
-    .on('all', e => {
-      switch (e) {
-        case 'add':
-        case 'change':
-          this.build(entries, distPath)
-          break
-      }
-    })
-}
-
-async build (entries, distPath) {
-  const parcel = new ParcelBundler(entries, {
-    outDir: distPath,
-    publicUrl: '.',
-    minify: this.MINIFY,
-    sourceMaps: this.SOURCEMAPS,
-    cache: this.CACHE,
-    watch: false,
-    hmr: false
-  })
-
-  await parcel.bundle()
-}
-}
-2ytconst path = require('path')
-const chokidar = require('chokidar')
-const ParcelBundler = require('parcel-bundler')
-
-module.exports = class Builder {
-constructor (env = {}) {
-  this.PATH = {
-    src: env.ASSETS_PATH_SRC || 'src',
-    dist: env.ASSETS_PATH_DIST || 'dist',
-    html: env.ASSETS_PATH_HTML,
-    css: env.ASSETS_PATH_CSS,
-    js: env.ASSETS_PATH_JS,
-    vue: env.ASSETS_PATH_VUE
-  }
-  this.MINIFY = (env.ASSETS_MINIFY || 'true') === 'true'
-  this.SOURCEMAPS = (env.ASSETS_SOURCEMAPS || 'false') === 'true'
-  this.CACHE = (env.ASSETS_CACHE || 'true') === 'true'
-}
-
-start () {
-  const srcPath = path.resolve(this.PATH.src)
-  const distPath = path.resolve(this.PATH.dist)
-
-  const entries = []
-  const entriesToWatch = []
-
-  if (this.PATH.html !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.html)}/*.html`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.html)}/*.html`)
-  }
-  if (this.PATH.css !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.css)}/*.css`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.css)}/**/*.css`)
-  }
-  if (this.PATH.js !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.js)}/*.js`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.js)}/**/*.js`)
-  }
-  if (this.PATH.vue !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.vue)}/*.js`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.vue`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.css`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.js`)
-  }
-
-  chokidar.watch(entriesToWatch, { ignoreInitial: true })
-    .on('ready', () => {
-      this.build(entries, distPath)
-    })
-    .on('all', e => {
-      switch (e) {
-        case 'add':
-        case 'change':
-          this.build(entries, distPath)
-          break
-      }
-    })
-}
-
-async build (entries, distPath) {
-  const parcel = new ParcelBundler(entries, {
-    outDir: distPath,
-    publicUrl: '.',
-    minify: this.MINIFY,
-    sourceMaps: this.SOURCEMAPS,
-    cache: this.CACHE,
-    watch: false,
-    hmr: false
-  })
-
-  await parcel.bundle()
-}
-}
-2ytconst path = require('path')
-const chokidar = require('chokidar')
-const ParcelBundler = require('parcel-bundler')
-
-module.exports = class Builder {
-constructor (env = {}) {
-  this.PATH = {
-    src: env.ASSETS_PATH_SRC || 'src',
-    dist: env.ASSETS_PATH_DIST || 'dist',
-    html: env.ASSETS_PATH_HTML,
-    css: env.ASSETS_PATH_CSS,
-    js: env.ASSETS_PATH_JS,
-    vue: env.ASSETS_PATH_VUE
-  }
-  this.MINIFY = (env.ASSETS_MINIFY || 'true') === 'true'
-  this.SOURCEMAPS = (env.ASSETS_SOURCEMAPS || 'false') === 'true'
-  this.CACHE = (env.ASSETS_CACHE || 'true') === 'true'
-}
-
-start () {
-  const srcPath = path.resolve(this.PATH.src)
-  const distPath = path.resolve(this.PATH.dist)
-
-  const entries = []
-  const entriesToWatch = []
-
-  if (this.PATH.html !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.html)}/*.html`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.html)}/*.html`)
-  }
-  if (this.PATH.css !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.css)}/*.css`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.css)}/**/*.css`)
-  }
-  if (this.PATH.js !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.js)}/*.js`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.js)}/**/*.js`)
-  }
-  if (this.PATH.vue !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.vue)}/*.js`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.vue`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.css`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.js`)
-  }
-
-  chokidar.watch(entriesToWatch, { ignoreInitial: true })
-    .on('ready', () => {
-      this.build(entries, distPath)
-    })
-    .on('all', e => {
-      switch (e) {
-        case 'add':
-        case 'change':
-          this.build(entries, distPath)
-          break
-      }
-    })
-}
-
-async build (entries, distPath) {
-  const parcel = new ParcelBundler(entries, {
-    outDir: distPath,
-    publicUrl: '.',
-    minify: this.MINIFY,
-    sourceMaps: this.SOURCEMAPS,
-    cache: this.CACHE,
-    watch: false,
-    hmr: false
-  })
-
-  await parcel.bundle()
-}
-}
-2ytconst path = require('path')
-const chokidar = require('chokidar')
-const ParcelBundler = require('parcel-bundler')
-
-module.exports = class Builder {
-constructor (env = {}) {
-  this.PATH = {
-    src: env.ASSETS_PATH_SRC || 'src',
-    dist: env.ASSETS_PATH_DIST || 'dist',
-    html: env.ASSETS_PATH_HTML,
-    css: env.ASSETS_PATH_CSS,
-    js: env.ASSETS_PATH_JS,
-    vue: env.ASSETS_PATH_VUE
-  }
-  this.MINIFY = (env.ASSETS_MINIFY || 'true') === 'true'
-  this.SOURCEMAPS = (env.ASSETS_SOURCEMAPS || 'false') === 'true'
-  this.CACHE = (env.ASSETS_CACHE || 'true') === 'true'
-}
-
-start () {
-  const srcPath = path.resolve(this.PATH.src)
-  const distPath = path.resolve(this.PATH.dist)
-
-  const entries = []
-  const entriesToWatch = []
-
-  if (this.PATH.html !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.html)}/*.html`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.html)}/*.html`)
-  }
-  if (this.PATH.css !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.css)}/*.css`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.css)}/**/*.css`)
-  }
-  if (this.PATH.js !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.js)}/*.js`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.js)}/**/*.js`)
-  }
-  if (this.PATH.vue !== null) {
-    entries.push(`${path.join(srcPath, this.PATH.vue)}/*.js`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.vue`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.css`)
-    entriesToWatch.push(`${path.join(srcPath, this.PATH.vue)}/**/*.js`)
-  }
-
-  chokidar.watch(entriesToWatch, { ignoreInitial: true })
-    .on('ready', () => {
-      this.build(entries, distPath)
-    })
-    .on('all', e => {
-      switch (e) {
-        case 'add':
-        case 'change':
-          this.build(entries, distPath)
-          break
-      }
-    })
-}
-
-async build (entries, distPath) {
-  const parcel = new ParcelBundler(entries, {
-    outDir: distPath,
-    publicUrl: '.',
-    minify: this.MINIFY,
-    sourceMaps: this.SOURCEMAPS,
-    cache: this.CACHE,
-    watch: false,
-    hmr: false
-  })
-
-  await parcel.bundle()
-}
 }
