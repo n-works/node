@@ -1,6 +1,6 @@
 const HTMLAsset = require('parcel-bundler/src/assets/HTMLAsset')
 
-module.exports = class HTMLNoExternalsAsset extends HTMLAsset {
+module.exports = class ParcelHTMLAsset extends HTMLAsset {
   async collectDependencies () {
     this.ast = new Proxy(this.ast, {
       get (target, key) {

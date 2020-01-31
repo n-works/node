@@ -1,6 +1,6 @@
 const CSSAsset = require('parcel-bundler/src/assets/CSSAsset')
 
-module.exports = class CSSNoExternalsAsset extends CSSAsset {
+module.exports = class ParcelCSSAsset extends CSSAsset {
   async collectDependencies () {
     this.ast.root = new Proxy(this.ast.root, {
       get (target, key) {

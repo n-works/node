@@ -1,6 +1,6 @@
 {
   "name": "@n-works/assets-builder",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -12,16 +12,17 @@
   },
   "scripts": {
     "test": "node index.js",
-    "test:watch": "node index.js -w"
+    "test:watch": "node index.js -w",
+    "test:serve": "node index.js -s",
+    "test:help": "node index.js -h"
   },
   "dependencies": {
     "@babel/core": "^7.8.3",
     "@babel/preset-env": "^7.8.3",
-    "@n-works/parcel-plugin-no-externals": "^1.0.0",
     "@vue/component-compiler-utils": "^3.1.1",
     "autoprefixer": "^9.7.4",
+    "browser-sync": "^2.26.7",
     "chalk": "^3.0.0",
-    "chokidar": "^3.3.1",
     "commander": "^4.1.0",
     "imagemin": "^7.0.1",
     "imagemin-mozjpeg": "^8.0.0",
@@ -34,6 +35,7 @@
     "postcss-import": "^12.0.1",
     "postcss-nested": "^4.2.1",
     "vue": "^2.6.11",
+    "vue-hot-reload-api": "^2.3.4",
     "vue-template-compiler": "^2.6.11"
   }
 }
