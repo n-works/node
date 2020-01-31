@@ -1,0 +1,74 @@
+@import "./common/logo";
+
+* {
+  box-sizing: border-box;
+  font-family: "Helvetica Neue", "Helvetica", sans-serif;
+}
+
+*::before,
+*::after {
+  box-sizing: inherit;
+  font-family: inherit;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+
+  .heading {
+    color: var(--green-dark);
+    font-weight: var(--bold);
+    font-size: var(--large);
+    line-height: 1;
+    text-align: center;
+  }
+
+  .icons {
+    display: grid;
+    grid-gap: 30px;
+    grid-template-columns: 2fr repeat(3, 1fr);
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    .image {
+      display: flex;
+      align-items: center;
+      color: #d02d92;
+      font-size: var(--small);
+
+      img {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+      }
+    }
+
+    .color {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--small);
+
+      &::before {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
+        background-color: currentColor;
+        content: "";
+      }
+    }
+
+    .color.circle {
+      &::before {
+        border-radius: 50%;
+      }
+    }
+  }
+}
