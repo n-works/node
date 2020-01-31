@@ -1,6 +1,5 @@
 const fs = require('fs')
 const path = require('path')
-const chokidar = require('chokidar')
 const imagemin = require('imagemin')
 const imageminMozjpeg = require('imagemin-mozjpeg')
 const imageminPngquant = require('imagemin-pngquant')
@@ -64,21 +63,6 @@ module.exports = class Builder {
         .map(dirent => this.getDirectoryPaths(path.join(basePath, dirent.name)))
 
     return [basePath, ...directoryPaths].flat()
-  }
-
-  start () {
-    chokidar.watch(this.entriesToWatch, { ignoreInitial: true })
-      .on('ready', () => {
-        this.build()
-      })
-      .on('all', e => {
-        switch (e) {
-          case 'add':
-          case 'change':
-            this.build()
-            break
-        }
-      })
   }
 
   async build () {

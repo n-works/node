@@ -1,5 +1,4 @@
 const path = require('path')
-const chokidar = require('chokidar')
 const ParcelBundler = require('parcel-bundler')
 
 module.exports = class Builder {
@@ -52,21 +51,6 @@ module.exports = class Builder {
     }
   }
 
-  start () {
-    chokidar.watch(this.entriesToWatch, { ignoreInitial: true })
-      .on('ready', () => {
-        this.build()
-      })
-      .on('all', e => {
-        switch (e) {
-          case 'add':
-          case 'change':
-            this.build()
-            break
-        }
-      })
-  }
-
   async build () {
     const parcel = new ParcelBundler(this.entries, {
       outDir: this.PATH_DIST,
@@ -77,6 +61,9 @@ module.exports = class Builder {
       watch: false,
       hmr: false
     })
+
+    parcel.addAssetType('html', path.join(__dirname, 'ParcelHTMLAsset'))
+    parcel.addAssetType('css', path.join(__dirname, 'ParcelCSSAsset'))
 
     await parcel.bundle()
   }
