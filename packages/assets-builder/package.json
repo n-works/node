@@ -1,6 +1,6 @@
 {
   "name": "@n-works/assets-builder",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -8,11 +8,11 @@
     "directory": "packages/assets-builder"
   },
   "bin": {
-    "assets": "index.js"
+    "assets-builder": "index.js"
   },
   "scripts": {
-    "test": "node index.js .env.sample",
-    "test:watch": "node index.js .env.sample -w"
+    "test": "node index.js",
+    "test:watch": "node index.js -w"
   },
   "dependencies": {
     "@babel/core": "^7.8.3",
