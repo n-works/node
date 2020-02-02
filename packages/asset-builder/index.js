@@ -2,68 +2,54 @@
 
 const fs = require('fs')
 const path = require('path')
-
 const browserSync = require('browser-sync')
 const commander = require('commander')
 const dotenv = require('dotenv')
-
-const ParcelBuilder = require('./builders/ParcelBuilder')
 const ImageminBuilder = require('./builders/ImageminBuilder')
+const ParcelBuilder = require('./builders/ParcelBuilder')
 
 commander
-  .option('-w, --watch', 'watch file changes')
-  .option('-s, --serve', 'watch file changes and launch server')
-  .option('-p, --proxy <url>', 'server proxy')
+  .option('-w, --watch', 'build automatically when a file changes')
+  .option('-s, --serve <path>', 'launch development server')
+  .option('-p, --proxy <url>', 'launch development server with proxy')
   .parse(process.argv)
 
-const envfilePath = path.resolve('.env.assets')
-if (fs.existsSync(envfilePath)) {
-  dotenv.config({ path: envfilePath })
+// process.env に環境変数を設定
+const configPath = path.resolve('.env.assets')
+if (fs.existsSync(configPath)) {
+  dotenv.config({ path: configPath })
 }
 
-const parcelBuilder = new ParcelBuilder(process.env)
-const imageminBuilder = new ImageminBuilder(process.env)
+(async () => {
+  const builders = [
+    new ParcelBuilder(process.env),
+    new ImageminBuilder(process.env)
+  ]
 
-if (commander.watch || commander.serve) {
-  (async () => {
+  // 初回ビルド実行
+  await Promise.all(builders.map(builder => builder.build()))
+
+  if (commander.watch || commander.serve || commander.proxy) {
     const bs = browserSync.create()
 
-    await parcelBuilder.build()
-    await imageminBuilder.build()
-
-    bs.watch(parcelBuilder.entriesToWatch, { ignoreInitial: true }, () => {
-      parcelBuilder.build().then(() => {
-        if (commander.serve) {
-          bs.reload()
+    // ファイル変更時に自動ビルド、ブラウザ再読込み
+    builders.forEach(builder => {
+      bs.watch(builder.entriesForWatch, { ignoreInitial: true }, e => {
+        if (e === 'change' || e === 'add') {
+          builder.build().then(() => {
+            if (commander.serve || commander.proxy) {
+              bs.reload()
+            }
+          })
         }
       })
     })
 
-    bs.watch(imageminBuilder.entriesToWatch, { ignoreInitial: true }, () => {
-      imageminBuilder.build().then(() => {
-        if (commander.serve) {
-          bs.reload()
-        }
-      })
-    })
-
+    // 開発サーバを起動
     if (commander.serve) {
-      const options = {}
-
-      if (process.env.ASSETS_PATH_SERVER) {
-        options.server = process.env.ASSETS_PATH_SERVER
-      }
-
-      if (commander.proxy) {
-        options.proxy = commander.proxy
-      }
-
-      if (options.server || options.proxy) {
-        bs.init(options)
-      }
+      bs.init({ server: commander.serve })
+    } else if (commander.proxy) {
+      bs.init({ proxy: commander.proxy })
     }
-  })()
-} else {
-  parcelBuilder.build()
-  imageminBuilder.build()
-}
+  }
+})()

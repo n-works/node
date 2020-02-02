@@ -9,23 +9,27 @@ const chalk = require('chalk')
 
 module.exports = class Builder {
   constructor (env = {}) {
+    // JPEG画質
     this.QUALITY_JPEG =
       env.ASSETS_QUALITY_JPEG !== undefined
         ? parseInt(env.ASSETS_QUALITY_JPEG)
         : 70
 
+    // PNG画質
     this.QUALITY_PNG =
       env.ASSETS_QUALITY_PNG !== undefined
         ? parseInt(env.ASSETS_QUALITY_PNG)
         : 70
 
+    // WebP画質
     this.QUALITY_WEBP =
       env.ASSETS_QUALITY_WEBP !== undefined
         ? parseInt(env.ASSETS_QUALITY_WEBP)
         : 70
 
+    // エントリーポイント
     this.entries = []
-    this.entriesToWatch = []
+    this.entriesForWatch = []
 
     if (env.ASSETS_PATH_IMG === undefined) {
       return
@@ -48,7 +52,7 @@ module.exports = class Builder {
 
     if (fs.existsSync(this.PATH_SRC)) {
       this.entries = this.getDirectoryPaths(this.PATH_SRC)
-      this.entriesToWatch = [
+      this.entriesForWatch = [
         `${this.PATH_SRC}/**/*.jpg`,
         `${this.PATH_SRC}/**/*.png`,
         `${this.PATH_SRC}/**/*.svg`
@@ -56,6 +60,7 @@ module.exports = class Builder {
     }
   }
 
+  // 再帰的にディレクトリパスを取得
   getDirectoryPaths (basePath) {
     const directoryPaths =
       fs.readdirSync(basePath, { withFileTypes: true })
@@ -67,18 +72,23 @@ module.exports = class Builder {
 
   async build () {
     return Promise.all(this.entries.map(entry => {
+      // エントリーポイントの階層ごとに出力先を設定
       const destination = path.join(
         this.PATH_DIST,
         entry.replace(this.PATH_SRC, '.')
       )
 
+      // 圧縮用とWebP変換用で imagemin を2回実行
       return Promise.all([
         imagemin([`${entry}/*.{jpg,png,svg}`], {
           destination: destination,
           plugins: [
+            // https://github.com/imagemin/imagemin-mozjpeg
             imageminMozjpeg({
               quality: this.QUALITY_JPEG
             }),
+
+            // https://github.com/imagemin/imagemin-pngquant
             imageminPngquant({
               quality: [
                 this.QUALITY_PNG / 100,
@@ -86,6 +96,9 @@ module.exports = class Builder {
               ],
               speed: 1
             }),
+
+            // https://github.com/imagemin/imagemin-svgo
+            // dara-name を削除 (https://github.com/svg/svgo/issues/799)
             imageminSvgo({
               plugins: [
                 { removeUnknownsAndDefaults: { keepDataAttrs: false } }
@@ -96,6 +109,7 @@ module.exports = class Builder {
         imagemin([`${entry}/*.{jpg,png}`], {
           destination: destination,
           plugins: [
+            // https://github.com/imagemin/imagemin-webp
             imageminWebp({
               quality: this.QUALITY_WEBP
             })
@@ -104,10 +118,15 @@ module.exports = class Builder {
       ])
     })).then(files => {
       files
+        // imagemin を2回実行しているのでファイルリストを結合
         .flat(2)
+
+        // ファイルパスでソート
         .sort((f1, f2) =>
           f1.destinationPath > f2.destinationPath ? 1 : -1
         )
+
+        // ファイルごとに結果表示
         .forEach(file => {
           const filePath = file.destinationPath.replace(this.PATH_DIST + '/', '')
           const fileSizeOriginal = fs.statSync(file.sourcePath).size

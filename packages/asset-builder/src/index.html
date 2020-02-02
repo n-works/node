@@ -29,7 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
   <div class="logo"></div>
   <h1 class="heading">Hello, Vue</h1>
   <ul class="icons">
-    <li class="image"><img src="img/icons/png/instagram.webp" alt=""> instagram</li>
+    <li class="image">
+      <picture>
+        <source srcset="img/icons/png/instagram.webp" type="image/webp">
+        <img src="img/icons/png/instagram.png" alt="">
+      </picture>
+      instagram
+    </li>
     <li class="color">red</li>
     <li class="color">green</li>
     <li class="color">blue</li>

@@ -13,7 +13,8 @@
   "scripts": {
     "test": "node index.js",
     "test:watch": "node index.js -w",
-    "test:serve": "node index.js -s",
+    "test:serve": "node index.js -s dist",
+    "test:proxy": "node index.js -p localhost",
     "test:help": "node index.js -h"
   },
   "dependencies": {
@@ -35,7 +36,6 @@
     "postcss-import": "^12.0.1",
     "postcss-nested": "^4.2.1",
     "vue": "^2.6.11",
-    "vue-hot-reload-api": "^2.3.4",
     "vue-template-compiler": "^2.6.11"
   }
 }
