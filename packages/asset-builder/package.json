@@ -1,24 +1,25 @@
 {
-  "name": "@n-works/assets-builder",
-  "version": "1.0.6",
+  "name": "@n-works/asset-builder",
+  "version": "1.0.0",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/n-works/node.git",
-    "directory": "packages/assets-builder"
+    "directory": "packages/asset-builder"
   },
   "bin": {
-    "assets-builder": "index.js"
+    "asset-builder": "index.js"
   },
   "scripts": {
     "test": "node index.js",
     "test:watch": "node index.js -w",
-    "test:serve": "node index.js -s",
+    "test:serve": "node index.js -s dist",
+    "test:proxy": "node index.js -p localhost",
     "test:help": "node index.js -h"
   },
   "dependencies": {
-    "@babel/core": "^7.8.3",
-    "@babel/preset-env": "^7.8.3",
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
     "@vue/component-compiler-utils": "^3.1.1",
     "autoprefixer": "^9.7.4",
     "browser-sync": "^2.26.7",
@@ -35,7 +36,6 @@
     "postcss-import": "^12.0.1",
     "postcss-nested": "^4.2.1",
     "vue": "^2.6.11",
-    "vue-hot-reload-api": "^2.3.4",
     "vue-template-compiler": "^2.6.11"
   }
 }

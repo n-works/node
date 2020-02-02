@@ -2,6 +2,7 @@ const CSSAsset = require('parcel-bundler/src/assets/CSSAsset')
 
 module.exports = class ParcelCSSAsset extends CSSAsset {
   async collectDependencies () {
+    // オリジナルの walk の処理を変更
     this.ast.root = new Proxy(this.ast.root, {
       get (target, key) {
         if (key === 'walk') {
@@ -18,7 +19,13 @@ module.exports = class ParcelCSSAsset extends CSSAsset {
 
 function _walk (walk) {
   return walker => walk.call(this, node => {
-    if (node.value && node.value.startsWith('url(')) {
+    // 外部アセットの読込みを無効化
+    if (
+      node.value && (
+        // e.g. background-image: url(...);
+        node.value.startsWith('url(')
+      )
+    ) {
       return node
     }
 

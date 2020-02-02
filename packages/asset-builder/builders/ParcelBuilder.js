@@ -3,23 +3,27 @@ const ParcelBundler = require('parcel-bundler')
 
 module.exports = class Builder {
   constructor (env = {}) {
+    // 圧縮有効
     this.MINIFY =
       env.ASSETS_MINIFY !== undefined
         ? env.ASSETS_MINIFY === 'true'
         : true
 
+    // ソースマップ有効
     this.SOURCEMAPS =
       env.ASSETS_SOURCEMAPS !== undefined
         ? env.ASSETS_SOURCEMAPS === 'true'
         : false
 
+    // キャッシュ有効
     this.CACHE =
       env.ASSETS_CACHE !== undefined
         ? env.ASSETS_CACHE === 'true'
         : true
 
+    // エントリーポイント
     this.entries = []
-    this.entriesToWatch = []
+    this.entriesForWatch = []
 
     this.PATH_SRC = path.resolve(env.ASSETS_PATH_SRC || 'src')
     this.PATH_DIST = path.resolve(env.ASSETS_PATH_DIST || 'dist')
@@ -27,27 +31,27 @@ module.exports = class Builder {
     if (env.ASSETS_PATH_HTML !== undefined) {
       const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_HTML)
       this.entries.push(`${srcPath}/*.html`)
-      this.entriesToWatch.push(`${srcPath}/*.html`)
+      this.entriesForWatch.push(`${srcPath}/*.html`)
     }
 
     if (env.ASSETS_PATH_CSS !== undefined) {
       const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_CSS)
       this.entries.push(`${srcPath}/*.css`)
-      this.entriesToWatch.push(`${srcPath}/**/*.css`)
+      this.entriesForWatch.push(`${srcPath}/**/*.css`)
     }
 
     if (env.ASSETS_PATH_JS !== undefined) {
       const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_JS)
       this.entries.push(`${srcPath}/*.js`)
-      this.entriesToWatch.push(`${srcPath}/**/*.js`)
+      this.entriesForWatch.push(`${srcPath}/**/*.js`)
     }
 
     if (env.ASSETS_PATH_VUE !== undefined) {
       const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_VUE)
       this.entries.push(`${srcPath}/*.js`)
-      this.entriesToWatch.push(`${srcPath}/**/*.vue`)
-      this.entriesToWatch.push(`${srcPath}/**/*.css`)
-      this.entriesToWatch.push(`${srcPath}/**/*.js`)
+      this.entriesForWatch.push(`${srcPath}/**/*.vue`)
+      this.entriesForWatch.push(`${srcPath}/**/*.css`)
+      this.entriesForWatch.push(`${srcPath}/**/*.js`)
     }
   }
 
@@ -62,8 +66,9 @@ module.exports = class Builder {
       hmr: false
     })
 
-    parcel.addAssetType('html', path.join(__dirname, 'ParcelHTMLAsset'))
-    parcel.addAssetType('css', path.join(__dirname, 'ParcelCSSAsset'))
+    // 外部アセットの読込みを無効化
+    parcel.addAssetType('html', require.resolve('./ParcelHTMLAsset'))
+    parcel.addAssetType('css', require.resolve('./ParcelCSSAsset'))
 
     await parcel.bundle()
   }
