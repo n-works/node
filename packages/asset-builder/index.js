@@ -27,7 +27,9 @@ if (fs.existsSync(configPath)) {
   ]
 
   // 初回ビルド実行
-  await Promise.all(builders.map(builder => builder.build()))
+  for (const builder of builders) {
+    await builder.build()
+  }
 
   if (commander.watch || commander.serve || commander.proxy) {
     const bs = browserSync.create()
