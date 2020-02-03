@@ -36,7 +36,7 @@ if (fs.existsSync(configPath)) {
 
     // ファイル変更時に自動ビルド、ブラウザ再読込み
     builders.forEach(builder => {
-      bs.watch(builder.entriesForWatch, { ignoreInitial: true }, e => {
+      bs.watch(builder.watchPatterns, { ignoreInitial: true }, e => {
         if (e === 'change' || e === 'add') {
           builder.build().then(() => {
             if (commander.serve || commander.proxy) {
@@ -46,6 +46,18 @@ if (fs.existsSync(configPath)) {
         }
       })
     })
+
+    // 任意のウォッチパターン
+    const extraWatchPatterns =
+      (process.env.ASSETS_EXTRA_WATCH_PATTERNS || '').split(',')
+
+    if (extraWatchPatterns.length > 0) {
+      bs.watch(extraWatchPatterns, { ignoreInitial: true }, e => {
+        if (commander.serve || commander.proxy) {
+          bs.reload()
+        }
+      })
+    }
 
     // 開発サーバを起動
     if (commander.serve) {
