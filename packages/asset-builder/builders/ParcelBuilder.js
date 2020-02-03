@@ -21,9 +21,9 @@ module.exports = class Builder {
         ? env.ASSETS_CACHE === 'true'
         : true
 
-    // エントリーポイント
+    // エントリーポイント、ウォッチパターン
     this.entries = []
-    this.entriesForWatch = []
+    this.watchPatterns = []
 
     this.PATH_SRC = path.resolve(env.ASSETS_PATH_SRC || 'src')
     this.PATH_DIST = path.resolve(env.ASSETS_PATH_DIST || 'dist')
@@ -31,27 +31,27 @@ module.exports = class Builder {
     if (env.ASSETS_PATH_HTML !== undefined) {
       const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_HTML)
       this.entries.push(`${srcPath}/*.html`)
-      this.entriesForWatch.push(`${srcPath}/*.html`)
+      this.watchPatterns.push(`${srcPath}/*.html`)
     }
 
     if (env.ASSETS_PATH_CSS !== undefined) {
       const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_CSS)
       this.entries.push(`${srcPath}/*.css`)
-      this.entriesForWatch.push(`${srcPath}/**/*.css`)
+      this.watchPatterns.push(`${srcPath}/**/*.css`)
     }
 
     if (env.ASSETS_PATH_JS !== undefined) {
       const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_JS)
       this.entries.push(`${srcPath}/*.js`)
-      this.entriesForWatch.push(`${srcPath}/**/*.js`)
+      this.watchPatterns.push(`${srcPath}/**/*.js`)
     }
 
     if (env.ASSETS_PATH_VUE !== undefined) {
       const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_VUE)
       this.entries.push(`${srcPath}/*.js`)
-      this.entriesForWatch.push(`${srcPath}/**/*.vue`)
-      this.entriesForWatch.push(`${srcPath}/**/*.css`)
-      this.entriesForWatch.push(`${srcPath}/**/*.js`)
+      this.watchPatterns.push(`${srcPath}/**/*.vue`)
+      this.watchPatterns.push(`${srcPath}/**/*.css`)
+      this.watchPatterns.push(`${srcPath}/**/*.js`)
     }
   }
 

@@ -27,9 +27,9 @@ module.exports = class Builder {
         ? parseInt(env.ASSETS_QUALITY_WEBP)
         : 70
 
-    // エントリーポイント
+    // エントリーポイント、ウォッチパターン
     this.entries = []
-    this.entriesForWatch = []
+    this.watchPatterns = []
 
     if (env.ASSETS_PATH_IMG === undefined) {
       return
@@ -52,7 +52,7 @@ module.exports = class Builder {
 
     if (fs.existsSync(this.PATH_SRC)) {
       this.entries = this.getDirectoryPaths(this.PATH_SRC)
-      this.entriesForWatch = [
+      this.watchPatterns = [
         `${this.PATH_SRC}/**/*.jpg`,
         `${this.PATH_SRC}/**/*.png`,
         `${this.PATH_SRC}/**/*.svg`
