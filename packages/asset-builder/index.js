@@ -4,7 +4,6 @@ const fs = require('fs')
 const path = require('path')
 const browserSync = require('browser-sync')
 const commander = require('commander')
-const dotenv = require('dotenv')
 const ImageminBuilder = require('./builders/ImageminBuilder')
 const ParcelBuilder = require('./builders/ParcelBuilder')
 
@@ -14,16 +13,13 @@ commander
   .option('-p, --proxy <url>', 'launch development server with proxy')
   .parse(process.argv)
 
-// process.env に環境変数を設定
-const configPath = path.resolve('.env.assets')
-if (fs.existsSync(configPath)) {
-  dotenv.config({ path: configPath })
-}
+// 設定ファイルを読込み
+const config = JSON.parse(fs.readFileSync(path.resolve('.assetsrc')));
 
 (async () => {
   const builders = [
-    new ParcelBuilder(process.env),
-    new ImageminBuilder(process.env)
+    new ParcelBuilder(config),
+    new ImageminBuilder(config)
   ]
 
   // 初回ビルド実行
@@ -34,11 +30,28 @@ if (fs.existsSync(configPath)) {
   if (commander.watch || commander.serve || commander.proxy) {
     const bs = browserSync.create()
 
-    // ファイル変更時に自動ビルド、ブラウザ再読込み
+    // https://github.com/paulmillr/chokidar
+    const watchOptions = {
+      ignoreInitial: true,
+      awaitWriteFinish: {
+        stabilityThreshold: 200
+      }
+    }
+
+    // ファイル変更時に自動ビルド
     builders.forEach(builder => {
-      bs.watch(builder.watchPatterns, { ignoreInitial: true }, e => {
-        if (e === 'change' || e === 'add') {
-          builder.build().then(() => {
+      bs.watch(builder.watchPatterns, watchOptions, (eventType, filePath) => {
+        if (eventType === 'change' || eventType === 'add') {
+          // 変更ファイルのエントリーポイントを検索
+          const entries = []
+          builder.entryFiles.forEach((assets, entry) => {
+            if (assets.has(filePath)) {
+              entries.push(entry)
+            }
+          })
+
+          // 再ビルド、ブラウザ再読込み
+          builder.build(entries.length > 0 ? entries : null).then(() => {
             if (commander.serve || commander.proxy) {
               bs.reload()
             }
@@ -47,12 +60,9 @@ if (fs.existsSync(configPath)) {
       })
     })
 
-    // 任意のウォッチパターン
-    const extraWatchPatterns =
-      (process.env.ASSETS_EXTRA_WATCH_PATTERNS || '').split(',')
-
-    if (extraWatchPatterns.length > 0) {
-      bs.watch(extraWatchPatterns, { ignoreInitial: true }, e => {
+    // 追加のウォッチパターン
+    if (config.extraWatchPatterns.length > 0) {
+      bs.watch(config.extraWatchPatterns, watchOptions, () => {
         if (commander.serve || commander.proxy) {
           bs.reload()
         }

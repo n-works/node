@@ -1,0 +1,22 @@
+{
+  "src": "src",
+  "dist": "dist",
+  "directories": {
+    "html": [""],
+    "css": ["css"],
+    "js": ["js"],
+    "vue": ["vue"]
+  },
+  "cache": true,
+  "minify": true,
+  "sourcemaps": false,
+  "imageDirectory": "img",
+  "imageQuality": {
+    "jpeg": 70,
+    "png": 70,
+    "webp": 70
+  },
+  "extraWatchPatterns": [
+    "dist/*.html"
+  ]
+}

@@ -1,67 +1,93 @@
+const fs = require('fs')
 const path = require('path')
 const ParcelBundler = require('parcel-bundler')
 
 module.exports = class Builder {
-  constructor (env = {}) {
+  constructor (config) {
+    // キャッシュ有効
+    this.cache = config.cache
+
     // 圧縮有効
-    this.MINIFY =
-      env.ASSETS_MINIFY !== undefined
-        ? env.ASSETS_MINIFY === 'true'
-        : true
+    this.minify = config.minify
 
     // ソースマップ有効
-    this.SOURCEMAPS =
-      env.ASSETS_SOURCEMAPS !== undefined
-        ? env.ASSETS_SOURCEMAPS === 'true'
-        : false
+    this.sourcemaps = config.sourcemaps
 
-    // キャッシュ有効
-    this.CACHE =
-      env.ASSETS_CACHE !== undefined
-        ? env.ASSETS_CACHE === 'true'
-        : true
-
-    // エントリーポイント、ウォッチパターン
+    // エントリーポイント
     this.entries = []
+
+    // エントリーファイル
+    this.entryFiles = new Map()
+
+    // ウォッチパターン
     this.watchPatterns = []
 
-    this.PATH_SRC = path.resolve(env.ASSETS_PATH_SRC || 'src')
-    this.PATH_DIST = path.resolve(env.ASSETS_PATH_DIST || 'dist')
+    this.srcPath = path.resolve(config.src)
+    this.distPath = path.resolve(config.dist)
 
-    if (env.ASSETS_PATH_HTML !== undefined) {
-      const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_HTML)
+    // HTML設定
+    config.directories.html.forEach(dir => {
+      const srcPath = path.join(this.srcPath, dir)
       this.entries.push(`${srcPath}/*.html`)
       this.watchPatterns.push(`${srcPath}/*.html`)
-    }
+    })
 
-    if (env.ASSETS_PATH_CSS !== undefined) {
-      const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_CSS)
+    // CSS設定
+    config.directories.css.forEach(dir => {
+      const srcPath = path.join(this.srcPath, dir)
       this.entries.push(`${srcPath}/*.css`)
       this.watchPatterns.push(`${srcPath}/**/*.css`)
-    }
+    })
 
-    if (env.ASSETS_PATH_JS !== undefined) {
-      const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_JS)
+    // JS設定
+    config.directories.js.forEach(dir => {
+      const srcPath = path.join(this.srcPath, dir)
       this.entries.push(`${srcPath}/*.js`)
       this.watchPatterns.push(`${srcPath}/**/*.js`)
-    }
+    })
 
-    if (env.ASSETS_PATH_VUE !== undefined) {
-      const srcPath = path.join(this.PATH_SRC, env.ASSETS_PATH_VUE)
+    // Vue設定
+    config.directories.vue.forEach(dir => {
+      const srcPath = path.join(this.srcPath, dir)
       this.entries.push(`${srcPath}/*.js`)
       this.watchPatterns.push(`${srcPath}/**/*.vue`)
       this.watchPatterns.push(`${srcPath}/**/*.css`)
       this.watchPatterns.push(`${srcPath}/**/*.js`)
-    }
+    })
   }
 
-  async build () {
-    const parcel = new ParcelBundler(this.entries, {
-      outDir: this.PATH_DIST,
+  updateEntryFiles (bundle) {
+    // エントリーファイルを更新
+    if (bundle.entryAsset) {
+      this.entryFiles.set(
+        bundle.entryAsset.name,
+        new Set(Array.from(bundle.assets).map(
+          asset => asset.name
+        ))
+      )
+    }
+
+    // 再帰的に子バンドルを処理
+    bundle.childBundles.forEach(childBundle => {
+      this.updateEntryFiles(childBundle)
+    })
+  }
+
+  async build (entryFiles) {
+    // エントリーポイントの基準ファイルを作成
+    const entryAsset = path.join(this.srcPath, 'entry.asset')
+    const entryAssetDist = path.join(this.distPath, 'entry.asset')
+    if (!fs.existsSync(entryAsset)) {
+      fs.writeFileSync(entryAsset, '')
+    }
+
+    const entries = [entryAsset, ...(entryFiles || this.entries)]
+    const parcel = new ParcelBundler(entries, {
+      outDir: this.distPath,
       publicUrl: '.',
-      minify: this.MINIFY,
-      sourceMaps: this.SOURCEMAPS,
-      cache: this.CACHE,
+      cache: this.cache,
+      minify: this.minify,
+      sourceMaps: this.sourcemaps,
       watch: false,
       hmr: false
     })
@@ -70,6 +96,15 @@ module.exports = class Builder {
     parcel.addAssetType('html', require.resolve('./ParcelHTMLAsset'))
     parcel.addAssetType('css', require.resolve('./ParcelCSSAsset'))
 
-    await parcel.bundle()
+    const bundle = await parcel.bundle()
+    this.updateEntryFiles(bundle)
+
+    // エントリーポイントの基準ファイルを削除
+    if (fs.existsSync(entryAsset)) {
+      fs.unlinkSync(entryAsset)
+    }
+    if (fs.existsSync(entryAssetDist)) {
+      fs.unlinkSync(entryAssetDist)
+    }
   }
 }
