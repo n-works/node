@@ -8,6 +8,7 @@
     "node": true
   },
   "plugins": [
+    "html",
     "vue"
   ],
   "extends": [
