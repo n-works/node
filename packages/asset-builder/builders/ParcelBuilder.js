@@ -19,41 +19,36 @@ module.exports = class Builder {
     // エントリーファイル
     this.entryFiles = new Map()
 
-    // ウォッチパターン
-    this.watchPatterns = []
-
     this.srcPath = path.resolve(config.src)
     this.distPath = path.resolve(config.dist)
 
-    // HTML設定
     config.directories.html.forEach(dir => {
       const srcPath = path.join(this.srcPath, dir)
       this.entries.push(`${srcPath}/*.html`)
-      this.watchPatterns.push(`${srcPath}/*.html`)
     })
 
-    // CSS設定
     config.directories.css.forEach(dir => {
       const srcPath = path.join(this.srcPath, dir)
       this.entries.push(`${srcPath}/*.css`)
-      this.watchPatterns.push(`${srcPath}/**/*.css`)
     })
 
-    // JS設定
     config.directories.js.forEach(dir => {
       const srcPath = path.join(this.srcPath, dir)
       this.entries.push(`${srcPath}/*.js`)
-      this.watchPatterns.push(`${srcPath}/**/*.js`)
     })
 
-    // Vue設定
     config.directories.vue.forEach(dir => {
       const srcPath = path.join(this.srcPath, dir)
       this.entries.push(`${srcPath}/*.js`)
-      this.watchPatterns.push(`${srcPath}/**/*.vue`)
-      this.watchPatterns.push(`${srcPath}/**/*.css`)
-      this.watchPatterns.push(`${srcPath}/**/*.js`)
     })
+
+    // ウォッチパターン
+    this.watchPatterns = [
+      `${this.srcPath}/**/*.html`,
+      `${this.srcPath}/**/*.css`,
+      `${this.srcPath}/**/*.js`,
+      `${this.srcPath}/**/*.vue`
+    ]
   }
 
   updateEntryFiles (bundle) {
@@ -76,7 +71,6 @@ module.exports = class Builder {
   async build (entryFiles) {
     // エントリーポイントの基準ファイルを作成
     const entryAsset = path.join(this.srcPath, 'entry.asset')
-    const entryAssetDist = path.join(this.distPath, 'entry.asset')
     if (!fs.existsSync(entryAsset)) {
       fs.writeFileSync(entryAsset, '')
     }
@@ -103,6 +97,9 @@ module.exports = class Builder {
     if (fs.existsSync(entryAsset)) {
       fs.unlinkSync(entryAsset)
     }
+
+    // ビルド後のエントリーポイントの基準ファイルを削除
+    const entryAssetDist = path.join(this.distPath, 'entry.asset')
     if (fs.existsSync(entryAssetDist)) {
       fs.unlinkSync(entryAssetDist)
     }

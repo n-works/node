@@ -24,21 +24,18 @@ module.exports = class Builder {
     // エントリーファイル
     this.entryFiles = new Map()
 
-    // ウォッチパターン
-    this.watchPatterns = []
-
-    if (typeof config.imageDirectory !== 'string') {
-      return
-    }
-
-    this.srcPath = path.join(path.resolve(config.src), config.imageDirectory)
-    this.distPath = path.join(path.resolve(config.dist), config.imageDirectory)
+    this.srcPath = path.resolve(config.src)
+    this.distPath = path.resolve(config.dist)
     this.distPathRelative = path.relative(path.resolve(), this.distPath)
 
-    if (fs.existsSync(this.srcPath)) {
-      this.entries = this.getDirectoryPaths(this.srcPath)
-    }
+    config.directories.image.forEach(dir => {
+      const srcPath = path.join(this.srcPath, dir)
+      if (fs.existsSync(srcPath)) {
+        this.entries = this.entries.concat(this.getDirectoryPaths(srcPath))
+      }
+    })
 
+    // ウォッチパターン
     this.watchPatterns = [
       `${this.srcPath}/**/*.jpg`,
       `${this.srcPath}/**/*.png`,
@@ -100,11 +97,8 @@ module.exports = class Builder {
   async build (entryFiles) {
     return Promise.all((entryFiles || this.entries).map(entry => {
       // エントリーポイントごとにビルド先を設定
-      const dirname = path.extname(entry) === '' ? entry : path.dirname(entry)
-      const distPath = path.join(
-        this.distPath,
-        dirname.replace(this.srcPath, '.')
-      )
+      const basePath = path.extname(entry) === '' ? entry : path.dirname(entry)
+      const distPath = basePath.replace(this.srcPath, this.distPath)
 
       if (entry.match(/\.svg$/)) {
         // SVG圧縮
@@ -128,9 +122,7 @@ module.exports = class Builder {
       // imagemin 実行分のファイルリストを結合
       const files = result
         .flat(2)
-        .sort((f1, f2) =>
-          f1.destinationPath > f2.destinationPath ? 1 : -1
-        )
+        .sort((f1, f2) => f1.destinationPath > f2.destinationPath ? 1 : -1)
 
       files.forEach(file => {
         // エントリーファイルを更新
@@ -142,9 +134,9 @@ module.exports = class Builder {
 
         // ビルド結果出力
         console.log(
-            `${this.distPathRelative}/` + chalk.cyan.bold(filePath),
-            `${(fileSizeOriginal / 1000).toFixed(1)} KB ->`,
-            chalk.magenta.bold(`${(fileSizeMinified / 1000).toFixed(1)} KB`)
+          `${this.distPathRelative}/` + chalk.cyan.bold(filePath),
+          `${(fileSizeOriginal / 1000).toFixed(1)} KB ->`,
+          chalk.magenta.bold(`${(fileSizeMinified / 1000).toFixed(1)} KB`)
         )
       })
     })

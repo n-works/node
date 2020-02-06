@@ -14,7 +14,7 @@ commander
   .parse(process.argv)
 
 // 設定ファイルを読込み
-const config = JSON.parse(fs.readFileSync(path.resolve('.assetsrc')));
+const config = JSON.parse(fs.readFileSync(path.resolve('.assetrc')));
 
 (async () => {
   const builders = [

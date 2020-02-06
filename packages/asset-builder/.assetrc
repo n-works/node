@@ -5,12 +5,12 @@
     "html": [""],
     "css": ["css"],
     "js": ["js"],
-    "vue": ["vue"]
+    "vue": ["vue"],
+    "image": ["img"]
   },
   "cache": true,
   "minify": true,
   "sourcemaps": false,
-  "imageDirectory": "img",
   "imageQuality": {
     "jpeg": 70,
     "png": 70,
