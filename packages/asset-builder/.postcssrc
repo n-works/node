@@ -8,6 +8,7 @@
       "preserve": false,
       "importFrom": "src/css/common/vars.css"
     },
-    "postcss-nested": {}
+    "postcss-media-minmax": {},
+    "postcss-nesting": {}
   }
 }

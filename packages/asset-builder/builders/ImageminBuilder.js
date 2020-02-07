@@ -8,60 +8,43 @@ const imageminWebp = require('imagemin-webp')
 const chalk = require('chalk')
 
 module.exports = class Builder {
-  constructor (env = {}) {
+  constructor (config) {
     // JPEG画質
-    this.QUALITY_JPEG =
-      env.ASSETS_QUALITY_JPEG !== undefined
-        ? parseInt(env.ASSETS_QUALITY_JPEG)
-        : 70
+    this.jpegQuality = config.imageQuality.jpeg
 
     // PNG画質
-    this.QUALITY_PNG =
-      env.ASSETS_QUALITY_PNG !== undefined
-        ? parseInt(env.ASSETS_QUALITY_PNG)
-        : 70
+    this.pngQuality = config.imageQuality.png
 
     // WebP画質
-    this.QUALITY_WEBP =
-      env.ASSETS_QUALITY_WEBP !== undefined
-        ? parseInt(env.ASSETS_QUALITY_WEBP)
-        : 70
+    this.webpQuality = config.imageQuality.webp
 
-    // エントリーポイント、ウォッチパターン
+    // エントリーポイント
     this.entries = []
-    this.watchPatterns = []
 
-    if (env.ASSETS_PATH_IMG === undefined) {
-      return
-    }
+    // エントリーファイル
+    this.entryFiles = new Map()
 
-    this.PATH_SRC = path.join(
-      path.resolve(env.ASSETS_PATH_SRC || 'src'),
-      env.ASSETS_PATH_IMG
-    )
+    this.srcPath = path.resolve(config.src)
+    this.distPath = path.resolve(config.dist)
+    this.distPathRelative = path.relative(path.resolve(), this.distPath)
 
-    this.PATH_DIST = path.join(
-      path.resolve(env.ASSETS_PATH_DIST || 'dist'),
-      env.ASSETS_PATH_IMG
-    )
+    config.directories.image.forEach(dir => {
+      const srcPath = path.join(this.srcPath, dir)
+      if (fs.existsSync(srcPath)) {
+        this.entries = this.entries.concat(this.getDirectoryPaths(srcPath))
+      }
+    })
 
-    this.PATH_DIST_RELATIVE = path.relative(
-      path.resolve(),
-      this.PATH_DIST
-    )
-
-    if (fs.existsSync(this.PATH_SRC)) {
-      this.entries = this.getDirectoryPaths(this.PATH_SRC)
-      this.watchPatterns = [
-        `${this.PATH_SRC}/**/*.jpg`,
-        `${this.PATH_SRC}/**/*.png`,
-        `${this.PATH_SRC}/**/*.svg`
-      ]
-    }
+    // ウォッチパターン
+    this.watchPatterns = [
+      `${this.srcPath}/**/*.jpg`,
+      `${this.srcPath}/**/*.png`,
+      `${this.srcPath}/**/*.svg`
+    ]
   }
 
-  // 再帰的にディレクトリパスを取得
   getDirectoryPaths (basePath) {
+    // 再帰的にディレクトリパスを取得
     const directoryPaths =
       fs.readdirSync(basePath, { withFileTypes: true })
         .filter(dirent => dirent.isDirectory())
@@ -70,74 +53,92 @@ module.exports = class Builder {
     return [basePath, ...directoryPaths].flat()
   }
 
-  async build () {
-    return Promise.all(this.entries.map(entry => {
-      // エントリーポイントの階層ごとに出力先を設定
-      const destination = path.join(
-        this.PATH_DIST,
-        entry.replace(this.PATH_SRC, '.')
-      )
-
-      // 圧縮用とWebP変換用で imagemin を2回実行
-      return Promise.all([
-        imagemin([`${entry}/*.{jpg,png,svg}`], {
-          destination: destination,
-          plugins: [
-            // https://github.com/imagemin/imagemin-mozjpeg
-            imageminMozjpeg({
-              quality: this.QUALITY_JPEG
-            }),
-
-            // https://github.com/imagemin/imagemin-pngquant
-            imageminPngquant({
-              quality: [
-                this.QUALITY_PNG / 100,
-                Math.min(this.QUALITY_PNG + 5, 100) / 100
-              ],
-              speed: 1
-            }),
-
-            // https://github.com/imagemin/imagemin-svgo
-            // dara-name を削除 (https://github.com/svg/svgo/issues/799)
-            imageminSvgo({
-              plugins: [
-                { removeUnknownsAndDefaults: { keepDataAttrs: false } }
-              ]
-            })
-          ]
+  async minify (enrty, distPath) {
+    return imagemin([enrty], {
+      destination: distPath,
+      plugins: [
+        // https://github.com/imagemin/imagemin-mozjpeg
+        imageminMozjpeg({
+          quality: this.jpegQuality
         }),
-        imagemin([`${entry}/*.{jpg,png}`], {
-          destination: destination,
+
+        // https://github.com/imagemin/imagemin-pngquant
+        imageminPngquant({
+          quality: [
+            this.pngQuality / 100,
+            Math.min(this.pngQuality + 5, 100) / 100
+          ],
+          speed: 1
+        }),
+
+        // https://github.com/imagemin/imagemin-svgo
+        // dara-name を削除 (https://github.com/svg/svgo/issues/799)
+        imageminSvgo({
           plugins: [
-            // https://github.com/imagemin/imagemin-webp
-            imageminWebp({
-              quality: this.QUALITY_WEBP
-            })
+            { removeUnknownsAndDefaults: { keepDataAttrs: false } }
           ]
         })
-      ])
-    })).then(files => {
-      files
-        // imagemin を2回実行しているのでファイルリストを結合
-        .flat(2)
+      ]
+    })
+  }
 
-        // ファイルパスでソート
-        .sort((f1, f2) =>
-          f1.destinationPath > f2.destinationPath ? 1 : -1
-        )
-
-        // ファイルごとに結果表示
-        .forEach(file => {
-          const filePath = file.destinationPath.replace(this.PATH_DIST + '/', '')
-          const fileSizeOriginal = fs.statSync(file.sourcePath).size
-          const fileSizeMinified = file.data.length
-
-          console.log(
-            `${this.PATH_DIST_RELATIVE}/` + chalk.cyan.bold(filePath),
-            `${(fileSizeOriginal / 1000).toFixed(1)} KB ->`,
-            chalk.magenta.bold(`${(fileSizeMinified / 1000).toFixed(1)} KB`)
-          )
+  async minifyWebp (enrty, distPath) {
+    return imagemin([enrty], {
+      destination: distPath,
+      plugins: [
+        // https://github.com/imagemin/imagemin-webp
+        imageminWebp({
+          quality: this.webpQuality
         })
+      ]
+    })
+  }
+
+  async build (entryFiles) {
+    return Promise.all((entryFiles || this.entries).map(entry => {
+      // エントリーポイントごとにビルド先を設定
+      const basePath = path.extname(entry) === '' ? entry : path.dirname(entry)
+      const distPath = basePath.replace(this.srcPath, this.distPath)
+
+      if (entry.match(/\.svg$/)) {
+        // SVG圧縮
+        return Promise.all([
+          this.minify(entry, distPath)
+        ])
+      } else if (entry.match(/\.(jpg|png)$/)) {
+        // JPEG、PNG圧縮とWebP変換
+        return Promise.all([
+          this.minify(entry, distPath),
+          this.minifyWebp(entry, distPath)
+        ])
+      } else {
+        // ディレクトリ配下の圧縮とWebP変換
+        return Promise.all([
+          this.minify(`${entry}/*.{jpg,png,svg}`, distPath),
+          this.minifyWebp(`${entry}/*.{jpg,png}`, distPath)
+        ])
+      }
+    })).then(result => {
+      // imagemin 実行分のファイルリストを結合
+      const files = result
+        .flat(2)
+        .sort((f1, f2) => f1.destinationPath > f2.destinationPath ? 1 : -1)
+
+      files.forEach(file => {
+        // エントリーファイルを更新
+        this.entryFiles.set(file.sourcePath, new Set([file.sourcePath]))
+
+        const filePath = file.destinationPath.replace(this.distPath + '/', '')
+        const fileSizeOriginal = fs.statSync(file.sourcePath).size
+        const fileSizeMinified = file.data.length
+
+        // ビルド結果出力
+        console.log(
+          `${this.distPathRelative}/` + chalk.cyan.bold(filePath),
+          `${(fileSizeOriginal / 1000).toFixed(1)} KB ->`,
+          chalk.magenta.bold(`${(fileSizeMinified / 1000).toFixed(1)} KB`)
+        )
+      })
     })
   }
 }
