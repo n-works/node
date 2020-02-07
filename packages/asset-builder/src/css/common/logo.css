@@ -33,3 +33,10 @@
     content: "";
   }
 }
+
+@media (560px <= width < 960px) {
+  .logo,
+  .logo::after {
+    border-top-color: var(--green-dark);
+  }
+}

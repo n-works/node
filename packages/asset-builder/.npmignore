@@ -1,7 +1,7 @@
 .cache
+.assetrc
 .babelrc
 .browserslistrc
-.env.assets
 .postcssrc
 dist
 src

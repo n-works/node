@@ -34,4 +34,10 @@ module.exports = {
 .btn:hover {
   background-color: var(--green-dark);
 }
+
+@media (560px <= width < 960px) {
+  .btn {
+    background-color: var(--green-dark);
+  }
+}
 </style>
