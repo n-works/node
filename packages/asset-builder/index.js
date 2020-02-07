@@ -44,11 +44,15 @@ const config = JSON.parse(fs.readFileSync(path.resolve('.assetrc')));
         if (eventType === 'change' || eventType === 'add') {
           // 変更ファイルのエントリーポイントを検索
           const entries = []
-          builder.entryFiles.forEach((assets, entry) => {
-            if (assets.has(filePath)) {
-              entries.push(entry)
-            }
-          })
+          if (builder instanceof ImageminBuilder) {
+            entries.push(filePath)
+          } else {
+            builder.entryFiles.forEach((assets, entry) => {
+              if (assets.has(filePath)) {
+                entries.push(entry)
+              }
+            })
+          }
 
           // 再ビルド、ブラウザ再読込み
           builder.build(entries.length > 0 ? entries : null).then(() => {
