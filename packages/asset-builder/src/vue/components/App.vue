@@ -4,11 +4,12 @@
     <p class="user-agent">
       {{ userAgent }}
     </p>
+    <div class="wordpress"></div>
   </div>
 </template>
 
 <script>
-import Btn from './Btn'
+import Btn from './Btn.vue'
 
 module.exports = {
   components: {
