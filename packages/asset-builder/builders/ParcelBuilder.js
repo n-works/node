@@ -13,7 +13,7 @@ module.exports = class Builder {
     // ソースマップ有効
     this.sourcemaps = config.sourcemaps
 
-    // エントリーポイント
+    // エントリーポイント、ウォッチパターン
     this.entries = []
 
     // エントリーファイル
