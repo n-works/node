@@ -4,6 +4,6 @@
     "packages/*"
   ],
   "devDependencies": {
-    "@n-works/lint": "^1.0.0"
+    "@n-works/lint": "^1.1.0"
   }
 }
